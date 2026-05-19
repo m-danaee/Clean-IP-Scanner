@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/4n0nymou3/Clean-IP-Scanner/config"
-	"github.com/4n0nymou3/Clean-IP-Scanner/scanner"
-	"github.com/4n0nymou3/Clean-IP-Scanner/utils"
+	"github.com/m-danaee/Clean-IP-Scanner/config"
+	"github.com/m-danaee/Clean-IP-Scanner/scanner"
+	"github.com/m-danaee/Clean-IP-Scanner/utils"
 	"github.com/fatih/color"
 )
 

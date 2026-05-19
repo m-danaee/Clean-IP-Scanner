@@ -41,7 +41,7 @@
 این روش برای اجرای پروژه روی Ubuntu 24.04 بهینه شده است:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/4n0nymou3/Clean-IP-Scanner/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/m-danaee/Clean-IP-Scanner/main/install.sh | bash
 ```
 
 پس از اتمام:
@@ -62,7 +62,7 @@ clean-ip-scanner
 این روش سریع‌ترین و ساده‌ترین روش برای کاربران Termux است:
 
 ```bash
-pkg update && pkg upgrade -y && pkg install -y wget unzip && wget https://github.com/4n0nymou3/Clean-IP-Scanner/releases/latest/download/clean-ip-scanner-arm64.zip && unzip clean-ip-scanner-arm64.zip && chmod +x clean-ip-scanner
+pkg update && pkg upgrade -y && pkg install -y wget unzip && wget https://github.com/m-danaee/Clean-IP-Scanner/releases/latest/download/clean-ip-scanner-arm64.zip && unzip clean-ip-scanner-arm64.zip && chmod +x clean-ip-scanner
 ```
 
 پس از اتمام، ابزار را اجرا کنید:
@@ -85,7 +85,7 @@ pkg update && pkg upgrade -y && pkg install -y wget unzip && wget https://github
 این روش برای کاربرانی است که می‌خواهند ابزار را مستقیماً از سورس کد در دستگاه خودشان بسازند (Ubuntu و Termux). یک دستور ساده:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/4n0nymou3/Clean-IP-Scanner/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/m-danaee/Clean-IP-Scanner/main/install.sh | bash
 ```
 
 پس از اتمام، از هرجایی اجرا کنید:
@@ -487,7 +487,7 @@ cat clean_ips_list.txt
 
 ```bash
 rm -f clean-ip-scanner clean-ip-scanner-arm64.zip
-wget https://github.com/4n0nymou3/Clean-IP-Scanner/releases/latest/download/clean-ip-scanner-arm64.zip
+wget https://github.com/m-danaee/Clean-IP-Scanner/releases/latest/download/clean-ip-scanner-arm64.zip
 unzip clean-ip-scanner-arm64.zip
 chmod +x clean-ip-scanner
 ```
