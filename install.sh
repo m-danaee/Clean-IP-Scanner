@@ -162,7 +162,7 @@ echo "[5/6] Setting up Xray config files..."
 mkdir -p config
 
 if [ ! -f "config/xray_config.json" ]; then
-    cat > config/xray_config.json << 'JSON_EOF'
+    cat > config/xray_config.json << 'EOF_JSON'
 {
   "log": { "loglevel": "warning" },
   "inbounds": [
@@ -198,14 +198,14 @@ if [ ! -f "config/xray_config.json" ]; then
     }
   ]
 }
-JSON_EOF
+EOF_JSON
     echo "✓ Sample JSON config created at config/xray_config.json"
 else
     echo "✓ Existing xray_config.json found, keeping it."
 fi
 
 if [ ! -f "config/xray_config.txt" ]; then
-    cat > config/xray_config.txt << 'TXT_EOF'
+    cat > config/xray_config.txt << 'EOF_TXT'
 # Xray URL Config
 # Put your proxy URL on the line below (remove the # at the start).
 # Supported formats: vless://, vmess://, trojan://, ss://
@@ -213,7 +213,7 @@ if [ ! -f "config/xray_config.txt" ]; then
 # vless://your-uuid@your-server.com:443?type=ws&security=tls&host=your-server.com&path=%2F&sni=your-server.com#MyConfig
 #
 # If this file has a valid URL, it will be used instead of xray_config.json.
-TXT_EOF
+EOF_TXT
     echo "✓ Sample URL config created at config/xray_config.txt"
 else
     echo "✓ Existing xray_config.txt found, keeping it."
@@ -233,11 +233,11 @@ echo ""
 echo "Installing launcher..."
 
 LAUNCHER_TMP="$(mktemp)"
-cat > "${LAUNCHER_TMP}" << 'SCRIPT'
+cat > "${LAUNCHER_TMP}" << 'EOF_SCRIPT'
 #!/usr/bin/env bash
 cd "$HOME/Clean-IP-Scanner"
 ./clean-ip-scanner "$@"
-SCRIPT
+EOF_SCRIPT
 
 if [[ "${PLATFORM}" == "termux" ]]; then
     mkdir -p "${INSTALL_TARGET}"
@@ -254,7 +254,7 @@ else
         mkdir -p "${HOME}/.local/bin"
         install -m 755 "${LAUNCHER_TMP}" "${HOME}/.local/bin/clean-ip-scanner"
         echo "✓ Installed to ${HOME}/.local/bin/clean-ip-scanner"
-        echo "  → Add this to PATH if needed: export PATH=\"${HOME}/.local/bin:\$PATH\""
+        echo "  → Add this to PATH if needed: export PATH=\"\$HOME/.local/bin:\$PATH\""
     fi
 fi
 
