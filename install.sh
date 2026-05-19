@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 clear
 
@@ -122,13 +122,13 @@ else
         return 0
     }
 
-    while [ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]; do
+    while [ "${RETRY_COUNT}" -lt "${MAX_RETRIES}" ]; do
         if download_xray; then
             echo "✓ Xray core installed"
             break
         else
             RETRY_COUNT=$((RETRY_COUNT + 1))
-            if [ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]; then
+            if [ "${RETRY_COUNT}" -lt "${MAX_RETRIES}" ]; then
                 echo "  → Retrying in 15 seconds..."
                 sleep 15
             fi
@@ -244,9 +244,10 @@ if [[ "${PLATFORM}" == "termux" ]]; then
     install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
     echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
 else
-    if install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner" 2>/dev/null; then
+    if install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"; then
         echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
     elif command -v sudo &> /dev/null; then
+        echo "  → Direct install failed, retrying with sudo..."
         sudo install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
         echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
     else
