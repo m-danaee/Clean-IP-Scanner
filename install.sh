@@ -14,6 +14,15 @@ XRAY_ASSET=""
 INSTALL_TARGET=""
 APT_PROXY="${APT_PROXY:-http://127.0.0.1:10808}"
 
+case "${APT_PROXY}" in
+    http://127.0.0.1:*|http://localhost:*)
+        ;;
+    *)
+        echo "✗ APT_PROXY must point to a local proxy (http://127.0.0.1:* or http://localhost:*)"
+        exit 1
+        ;;
+esac
+
 if [[ -n "${TERMUX_VERSION:-}" ]] || [[ "${PREFIX:-}" == *"/com.termux/"* ]]; then
     PLATFORM="termux"
     XRAY_ASSET="Xray-android-arm64-v8a.zip"
@@ -67,13 +76,13 @@ else
         fi
     fi
 
-    APT_PROXY_OPTS=(
-        -o "Acquire::http::Proxy=${APT_PROXY}"
-        -o "Acquire::https::Proxy=${APT_PROXY}"
-    )
+    APT_COMMAND=(apt-get -o "Acquire::HTTP::Proxy=${APT_PROXY}" -o "Acquire::HTTPS::Proxy=${APT_PROXY}")
+    if [[ -n "${SUDO}" ]]; then
+        APT_COMMAND=("${SUDO}" "${APT_COMMAND[@]}")
+    fi
 
-    ${SUDO} apt-get "${APT_PROXY_OPTS[@]}" update
-    ${SUDO} apt-get "${APT_PROXY_OPTS[@]}" install -y git golang-go curl unzip jq ca-certificates
+    "${APT_COMMAND[@]}" update
+    "${APT_COMMAND[@]}" install -y git golang-go curl unzip jq ca-certificates
 fi
 echo "✓ All packages ready"
 
