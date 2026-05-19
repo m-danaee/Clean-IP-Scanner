@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/4n0nymou3/Clean-IP-Scanner/scanner"
+	"github.com/m-danaee/Clean-IP-Scanner/scanner"
 )
 
 func PrintResults(results []scanner.IPResult) {

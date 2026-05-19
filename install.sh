@@ -78,7 +78,7 @@ if [ -d "Clean-IP-Scanner" ]; then
     echo "  → Removing old installation..."
     rm -rf Clean-IP-Scanner
 fi
-git clone -q https://github.com/4n0nymou3/Clean-IP-Scanner.git || { echo "✗ Failed to clone repository"; exit 1; }
+git clone -q https://github.com/m-danaee/Clean-IP-Scanner.git || { echo "✗ Failed to clone repository"; exit 1; }
 cd Clean-IP-Scanner || { echo "✗ Directory not found"; exit 1; }
 echo "✓ Source code downloaded"
 
