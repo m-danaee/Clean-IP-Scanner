@@ -31,7 +31,7 @@ else
             ;;
         *)
             echo "✗ Unsupported Linux architecture: ${ARCH}"
-            echo "  Supported: x86_64, aarch64, armv7"
+            echo "  Supported: x86_64/amd64, aarch64/arm64, armv7l/armv7"
             exit 1
             ;;
     esac
@@ -61,7 +61,7 @@ else
         if command -v sudo &> /dev/null; then
             SUDO="sudo"
         else
-            echo "✗ sudo is required on Ubuntu to install dependencies"
+            echo "✗ sudo is required on Linux to install dependencies"
             exit 1
         fi
     fi
