@@ -12,6 +12,7 @@ echo ""
 PLATFORM="linux"
 XRAY_ASSET=""
 INSTALL_TARGET=""
+APT_PROXY="${APT_PROXY:-http://127.0.0.1:10808}"
 
 if [[ -n "${TERMUX_VERSION:-}" ]] || [[ "${PREFIX:-}" == *"/com.termux/"* ]]; then
     PLATFORM="termux"
@@ -66,8 +67,13 @@ else
         fi
     fi
 
-    ${SUDO} apt-get update
-    ${SUDO} apt-get install -y git golang-go curl unzip jq ca-certificates
+    APT_PROXY_OPTS=(
+        -o "Acquire::http::Proxy=${APT_PROXY}"
+        -o "Acquire::https::Proxy=${APT_PROXY}"
+    )
+
+    ${SUDO} apt-get "${APT_PROXY_OPTS[@]}" update
+    ${SUDO} apt-get "${APT_PROXY_OPTS[@]}" install -y git golang-go curl unzip jq ca-certificates
 fi
 echo "✓ All packages ready"
 
