@@ -2,7 +2,7 @@
 
 <div dir="rtl">
 
-ابزار پیدا کردن IP‌های تمیز CDN‌های مختلف برای Termux (اندروید ARM64)
+ابزار پیدا کردن IP‌های تمیز CDN‌های مختلف برای **Ubuntu 24.04** و **Termux (اندروید ARM64)**
 
 ---
 
@@ -36,9 +36,30 @@
 
 ## 📥 نصب
 
-### روش اول: دانلود مستقیم فایل آماده (پیشنهادی برای اکثر کاربران)
+### روش Ubuntu 24.04 (پیشنهادی)
 
-این روش سریع‌ترین و ساده‌ترین روش است. فقط یک دستور در Termux وارد کنید:
+این روش برای اجرای پروژه روی Ubuntu 24.04 بهینه شده است:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/4n0nymou3/Clean-IP-Scanner/main/install.sh | bash
+```
+
+پس از اتمام:
+
+```bash
+clean-ip-scanner
+```
+
+**در Ubuntu این اسکریپت به‌صورت خودکار:**
+- پیش‌نیازها را با `apt` نصب می‌کند
+- هسته‌ی Xray مناسب معماری لینوکس شما را دانلود می‌کند
+- لانچر `clean-ip-scanner` را در PATH نصب می‌کند
+
+---
+
+### روش Termux: دانلود مستقیم فایل آماده
+
+این روش سریع‌ترین و ساده‌ترین روش برای کاربران Termux است:
 
 ```bash
 pkg update && pkg upgrade -y && pkg install -y wget unzip && wget https://github.com/4n0nymou3/Clean-IP-Scanner/releases/latest/download/clean-ip-scanner-arm64.zip && unzip clean-ip-scanner-arm64.zip && chmod +x clean-ip-scanner
@@ -61,13 +82,13 @@ pkg update && pkg upgrade -y && pkg install -y wget unzip && wget https://github
 
 ### روش دوم: ساخت از سورس کد
 
-این روش برای کاربرانی است که می‌خواهند ابزار را مستقیماً از سورس کد در دستگاه خودشان بسازند. یک دستور ساده:
+این روش برای کاربرانی است که می‌خواهند ابزار را مستقیماً از سورس کد در دستگاه خودشان بسازند (Ubuntu و Termux). یک دستور ساده:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/4n0nymou3/Clean-IP-Scanner/main/install.sh | bash
 ```
 
-پس از اتمام، از هرجایی در Termux اجرا کنید:
+پس از اتمام، از هرجایی اجرا کنید:
 
 ```bash
 clean-ip-scanner
@@ -75,7 +96,7 @@ clean-ip-scanner
 
 **مزایا:**
 - ۱۰۰٪ سازگار با دستگاه شما
-- ساخت مستقیم در Termux
+- ساخت مستقیم روی Ubuntu/Termux
 - نصب خودکار در PATH (از هر پوشه‌ای قابل اجراست)
 - دریافت خودکار هسته‌ی Xray
 
@@ -496,6 +517,13 @@ rm -rf config/ xray/
 
 ```bash
 rm -rf ~/Clean-IP-Scanner
+# Ubuntu (اگر لانچر در /usr/local/bin نصب شده باشد)
+sudo rm -f /usr/local/bin/clean-ip-scanner
+
+# Ubuntu (اگر لانچر در ~/.local/bin نصب شده باشد)
+rm -f ~/.local/bin/clean-ip-scanner
+
+# Termux
 rm -f /data/data/com.termux/files/usr/bin/clean-ip-scanner
 ```
 
@@ -533,6 +561,10 @@ rm -f /data/data/com.termux/files/usr/bin/clean-ip-scanner
 **تست سرعت صفر نشان می‌دهد؟**
 
 ```bash
+# Ubuntu
+sudo apt install -y ca-certificates
+
+# Termux
 pkg install ca-certificates
 ```
 
@@ -549,6 +581,10 @@ chmod +x clean-ip-scanner
 
 **خطا: `wget not found` یا `unzip not found` یا `curl not found`**
 ```bash
+# Ubuntu
+sudo apt install -y wget unzip curl
+
+# Termux
 pkg install wget unzip curl
 ```
 
@@ -572,11 +608,11 @@ pkg install wget unzip curl
 
 **ابزار کرش می‌کند یا پاسخ نمی‌دهد**
 
-Termux را ببندید و دوباره باز کنید:
+ترمینال را ببندید و دوباره باز کنید:
 ```bash
 exit
 ```
-سپس Termux را دوباره اجرا کنید و ابزار را مجدداً اجرا کنید.
+سپس دوباره ابزار را اجرا کنید.
 
 ---
 
@@ -586,7 +622,7 @@ exit
 - فایل `clean_ips.txt` را برای استفاده‌ی بعدی نگه دارید
 - در حالت Xray فقط **یکی** از دو فایل کانفیگ را پر کنید (اگر هر دو پر باشند، فایل txt اولویت دارد)
 - **کانفیگ Xray شما باید با CDN مورد نظر هم‌خوانی داشته باشد** — اگر IP‌های Akamai را اسکن می‌کنید، کانفیگتان باید روی سرور Akamai باشد
-- حداقل ۵۰ مگابایت فضای خالی در Termux داشته باشید
+- حداقل ۵۰ مگابایت فضای خالی روی سیستم داشته باشید
 - اگر نتیجه‌ی خوبی نگرفتید، در زمان دیگری دوباره امتحان کنید — شرایط شبکه متغیر است
 - در هر لحظه با **Ctrl+C** می‌توانید اسکن را متوقف کنید و نتایج تا آن لحظه ذخیره می‌شوند
 

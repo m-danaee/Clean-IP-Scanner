@@ -1,41 +1,79 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -eo pipefail
 
 clear
+
 echo "=========================================="
 echo "   Clean IP Scanner - Installer"
 echo "=========================================="
 echo ""
-echo "Installing for Termux (Android ARM64)"
+
+PLATFORM="linux"
+XRAY_ASSET=""
+INSTALL_TARGET=""
+
+if [[ -n "${TERMUX_VERSION:-}" ]] || [[ "${PREFIX:-}" == *"/com.termux/"* ]]; then
+    PLATFORM="termux"
+    XRAY_ASSET="Xray-android-arm64-v8a.zip"
+    INSTALL_TARGET="${PREFIX}/bin"
+else
+    ARCH="$(uname -m)"
+    case "${ARCH}" in
+        x86_64|amd64)
+            XRAY_ASSET="Xray-linux-64.zip"
+            ;;
+        aarch64|arm64)
+            XRAY_ASSET="Xray-linux-arm64-v8a.zip"
+            ;;
+        armv7l|armv7)
+            XRAY_ASSET="Xray-linux-arm32-v7a.zip"
+            ;;
+        *)
+            echo "✗ Unsupported Linux architecture: ${ARCH}"
+            echo "  Supported: x86_64/amd64, aarch64/arm64, armv7l/armv7"
+            exit 1
+            ;;
+    esac
+    INSTALL_TARGET="/usr/local/bin"
+fi
+
+echo "Detected platform: ${PLATFORM}"
+echo "Xray package: ${XRAY_ASSET}"
 echo ""
 
 echo "[1/6] Checking and installing packages..."
-if ! command -v git &> /dev/null; then
-    echo "  → Installing git..."
-    pkg install -y git || { echo "✗ Failed to install git"; exit 1; }
-fi
-if ! command -v go &> /dev/null; then
-    echo "  → Installing golang..."
-    pkg install -y golang || { echo "✗ Failed to install golang"; exit 1; }
-fi
-if ! command -v curl &> /dev/null; then
-    echo "  → Installing curl..."
-    pkg install -y curl
-fi
-if ! command -v unzip &> /dev/null; then
-    echo "  → Installing unzip..."
-    pkg install -y unzip
-fi
-if ! command -v jq &> /dev/null; then
-    echo "  → Installing jq..."
-    pkg install -y jq
+if [[ "${PLATFORM}" == "termux" ]]; then
+    for cmd in git go curl unzip jq; do
+        if ! command -v "${cmd}" &> /dev/null; then
+            pkg_name="${cmd}"
+            if [[ "${cmd}" == "go" ]]; then
+                pkg_name="golang"
+            fi
+            echo "  → Installing ${pkg_name}..."
+            pkg install -y "${pkg_name}" || { echo "✗ Failed to install ${pkg_name}"; exit 1; }
+        fi
+    done
+else
+    export DEBIAN_FRONTEND=noninteractive
+    SUDO=""
+    if [[ "$(id -u)" -ne 0 ]]; then
+        if command -v sudo &> /dev/null; then
+            SUDO="sudo"
+        else
+            echo "✗ sudo is required on Linux to install dependencies"
+            exit 1
+        fi
+    fi
+
+    ${SUDO} apt-get update
+    ${SUDO} apt-get install -y git golang-go curl unzip jq ca-certificates
 fi
 echo "✓ All packages ready"
 
 echo ""
 echo "[2/6] Downloading source code..."
-cd ~
+cd "${HOME}"
 if [ -d "Clean-IP-Scanner" ]; then
     echo "  → Removing old installation..."
     rm -rf Clean-IP-Scanner
@@ -50,7 +88,7 @@ go mod tidy || { echo "✗ Failed to download dependencies"; exit 1; }
 echo "✓ Dependencies ready"
 
 echo ""
-echo "[4/6] Installing Xray core (latest stable for Android ARM64-v8a)..."
+echo "[4/6] Installing Xray core (${XRAY_ASSET})..."
 
 if [ -f "./xray/xray" ]; then
     echo "  → Xray binary already present, skipping download."
@@ -59,17 +97,17 @@ else
     RETRY_COUNT=0
 
     download_xray() {
-        echo "  → Fetching latest Xray version from GitHub API (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)..."
+        echo "  → Fetching latest Xray release URL (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)..."
 
-        LATEST_URL=$(curl -sL "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | jq -r '.assets[] | select(.name=="Xray-android-arm64-v8a.zip") | .browser_download_url')
+        LATEST_URL=$(curl -sL "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | jq -r ".assets[] | select(.name==\"${XRAY_ASSET}\") | .browser_download_url")
 
-        if [ -z "$LATEST_URL" ] || [ "$LATEST_URL" = "null" ]; then
+        if [ -z "${LATEST_URL}" ] || [ "${LATEST_URL}" = "null" ]; then
             echo "  → Could not get download URL from API"
             return 1
         fi
 
-        echo "  → Downloading from $LATEST_URL"
-        curl -L --retry 3 --retry-delay 5 -o xray-core.zip "$LATEST_URL" || { echo "  → Download failed"; return 1; }
+        echo "  → Downloading from ${LATEST_URL}"
+        curl -L --retry 3 --retry-delay 5 -o xray-core.zip "${LATEST_URL}" || { echo "  → Download failed"; return 1; }
 
         if [ ! -f xray-core.zip ] || [ ! -s xray-core.zip ]; then
             echo "  → Downloaded file is missing or empty"
@@ -84,13 +122,13 @@ else
         return 0
     }
 
-    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    while [ "${RETRY_COUNT}" -lt "${MAX_RETRIES}" ]; do
         if download_xray; then
             echo "✓ Xray core installed"
             break
         else
             RETRY_COUNT=$((RETRY_COUNT + 1))
-            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            if [ "${RETRY_COUNT}" -lt "${MAX_RETRIES}" ]; then
                 echo "  → Retrying in 15 seconds..."
                 sleep 15
             fi
@@ -101,16 +139,16 @@ else
         echo ""
         echo "  → Auto-detection failed. Trying fallback version..."
         FALLBACK_VERSION="v26.3.27"
-        FALLBACK_URL="https://github.com/XTLS/Xray-core/releases/download/${FALLBACK_VERSION}/Xray-android-arm64-v8a.zip"
-        echo "  → Downloading $FALLBACK_VERSION from $FALLBACK_URL"
+        FALLBACK_URL="https://github.com/XTLS/Xray-core/releases/download/${FALLBACK_VERSION}/${XRAY_ASSET}"
+        echo "  → Downloading ${FALLBACK_VERSION} from ${FALLBACK_URL}"
 
-        if curl -L --retry 3 -o xray-core.zip "$FALLBACK_URL" && \
+        if curl -L --retry 3 -o xray-core.zip "${FALLBACK_URL}" && \
            unzip -o xray-core.zip -d xray_temp && \
            mkdir -p xray && \
            cp xray_temp/xray xray/ && \
            chmod +x xray/xray; then
             rm -rf xray_temp xray-core.zip
-            echo "✓ Xray core installed (fallback version $FALLBACK_VERSION)"
+            echo "✓ Xray core installed (fallback version ${FALLBACK_VERSION})"
         else
             rm -rf xray_temp xray-core.zip
             echo "✗ Failed to install Xray core. Please check your internet connection."
@@ -124,7 +162,7 @@ echo "[5/6] Setting up Xray config files..."
 mkdir -p config
 
 if [ ! -f "config/xray_config.json" ]; then
-    cat > config/xray_config.json << 'EOF'
+    cat > config/xray_config.json << 'EOF_JSON'
 {
   "log": { "loglevel": "warning" },
   "inbounds": [
@@ -160,14 +198,14 @@ if [ ! -f "config/xray_config.json" ]; then
     }
   ]
 }
-EOF
+EOF_JSON
     echo "✓ Sample JSON config created at config/xray_config.json"
 else
     echo "✓ Existing xray_config.json found, keeping it."
 fi
 
 if [ ! -f "config/xray_config.txt" ]; then
-    cat > config/xray_config.txt << 'EOF'
+    cat > config/xray_config.txt << 'EOF_TXT'
 # Xray URL Config
 # Put your proxy URL on the line below (remove the # at the start).
 # Supported formats: vless://, vmess://, trojan://, ss://
@@ -175,7 +213,7 @@ if [ ! -f "config/xray_config.txt" ]; then
 # vless://your-uuid@your-server.com:443?type=ws&security=tls&host=your-server.com&path=%2F&sni=your-server.com#MyConfig
 #
 # If this file has a valid URL, it will be used instead of xray_config.json.
-EOF
+EOF_TXT
     echo "✓ Sample URL config created at config/xray_config.txt"
 else
     echo "✓ Existing xray_config.txt found, keeping it."
@@ -192,14 +230,35 @@ fi
 echo "✓ Build completed"
 
 echo ""
-echo "Installing to system..."
-cat > $PREFIX/bin/clean-ip-scanner << 'SCRIPT'
-#!/data/data/com.termux/files/usr/bin/bash
-cd ~/Clean-IP-Scanner
+echo "Installing launcher..."
+
+LAUNCHER_TMP="$(mktemp)"
+cat > "${LAUNCHER_TMP}" << 'EOF_SCRIPT'
+#!/usr/bin/env bash
+cd "$HOME/Clean-IP-Scanner"
 ./clean-ip-scanner "$@"
-SCRIPT
-chmod +x $PREFIX/bin/clean-ip-scanner
-echo "✓ Installed to PATH"
+EOF_SCRIPT
+
+if [[ "${PLATFORM}" == "termux" ]]; then
+    mkdir -p "${INSTALL_TARGET}"
+    install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
+    echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
+else
+    if install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"; then
+        echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
+    elif command -v sudo &> /dev/null; then
+        echo "  → Direct install failed, retrying with sudo..."
+        sudo install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
+        echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
+    else
+        mkdir -p "${HOME}/.local/bin"
+        install -m 755 "${LAUNCHER_TMP}" "${HOME}/.local/bin/clean-ip-scanner"
+        echo "✓ Installed to ${HOME}/.local/bin/clean-ip-scanner"
+        echo "  → Add this to PATH if needed: export PATH=\"\$HOME/.local/bin:\$PATH\""
+    fi
+fi
+
+rm -f "${LAUNCHER_TMP}"
 
 echo ""
 echo "=========================================="
