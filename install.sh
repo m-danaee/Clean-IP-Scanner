@@ -244,8 +244,7 @@ if [[ "${PLATFORM}" == "termux" ]]; then
     install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
     echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
 else
-    if [ -w "${INSTALL_TARGET}" ]; then
-        install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
+    if install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner" 2>/dev/null; then
         echo "✓ Installed to ${INSTALL_TARGET}/clean-ip-scanner"
     elif command -v sudo &> /dev/null; then
         sudo install -m 755 "${LAUNCHER_TMP}" "${INSTALL_TARGET}/clean-ip-scanner"
